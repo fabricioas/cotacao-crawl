@@ -48,5 +48,11 @@ class ExampleSpider(scrapy.Spider):
             link = item.xpath("td[1]/a/@href").get().strip()
             razao = item.xpath("td[1]/a/text()").get().strip()
             nome = item.xpath("td[2]/a/text()").get().strip()
-            args = (nome,razao,link)
-            yield {"nome": nome, "razao":razao, "link":"http://bvmf.bmfbovespa.com.br/cias-listadas/Titulos-Negociaveis/" + link}
+            yield response.follow("http://bvmf.bmfbovespa.com.br/cias-listadas/Titulos-Negociaveis/" + link, self.parse_detail)
+
+    def parse_detail(self, response):
+        trList = response.xpath('//*[@id="ctl00_contentPlaceHolderConteudo_ctl00_grdDados_ctl01"]/tbody/tr')
+        for item in trList:
+            nome = item.xpath("td[1]/text()").get().strip()
+            sigla = item.xpath("td[3]/text()").get().strip()
+            yield {"nome": nome, "sigla":sigla}
